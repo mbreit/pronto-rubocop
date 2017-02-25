@@ -44,7 +44,7 @@ module Pronto
 
     def new_message(offence, line)
       path = line.patch.delta.new_file[:path]
-      level = level(offence.severity.name)
+      level = level(offence.severity.name).to_sym
 
       Message.new(path, line, level, offence.message, nil, self.class)
     end
@@ -62,10 +62,14 @@ module Pronto
     def level(severity)
       case severity
       when :refactor, :convention
-        :info
+        pronto_runner_config['default_level'] || :info
       when :warning, :error, :fatal
         severity
       end
+    end
+
+    def pronto_runner_config
+      respond_to?(:config) ? config : {}
     end
   end
 end
